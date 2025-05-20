@@ -24,23 +24,24 @@ interface CloudinaryUploadResult {
 export async function POST(request: NextRequest) {
 
     // Configuration - Moved inside the handler
-    cloudinary.config({
-        cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET // Click 'View Credentials' below to copy your API secret
-    });
+    // Only configure if environment variables are available (runtime)
+    if(
+        process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+    ) {
+        cloudinary.config({
+            cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET // Click 'View Credentials' below to copy your API secret
+        });
+    } else {
+         return NextResponse.json({error: "Cloudinary credentials not found"}, {status: 500})
+    }
 
     try {
 
         //todo to check user
-
-    if(
-        !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
-        !process.env.CLOUDINARY_API_KEY ||
-        !process.env.CLOUDINARY_API_SECRET
-    ){
-        return NextResponse.json({error: "Cloudinary credentials not found"}, {status: 500})
-    }
 
 
         const formData = await request.formData();
@@ -55,6 +56,11 @@ export async function POST(request: NextRequest) {
 
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
+
+        // Ensure cloudinary is configured before uploading
+        if (!cloudinary.config().cloud_name) {
+             return NextResponse.json({error: "Cloudinary configuration failed"}, {status: 500})
+        }
 
         const result = await new Promise<CloudinaryUploadResult>(
             (resolve, reject) => {

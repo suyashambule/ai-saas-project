@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 
+declare global {
+    var prisma: PrismaClient | undefined
+}
 
-const prisma = new PrismaClient()
+const prisma = globalThis.prisma || new PrismaClient()
+
+if(process.env.NODE_ENV !== 'production') globalThis.prisma = prisma
 
 export async function GET(request: NextRequest){
     try {
@@ -16,3 +21,4 @@ export async function GET(request: NextRequest){
         await prisma.$disconnect()
     }
 }
+
