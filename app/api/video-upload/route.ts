@@ -14,13 +14,6 @@ const prisma = globalThis.prisma || new PrismaClient()
 
 if(process.env.NODE_ENV !== 'production') globalThis.prisma = prisma
 
-// Configuration
-cloudinary.config({
-    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET // Click 'View Credentials' below to copy your API secret
-});
-
 interface CloudinaryUploadResult {
     public_id: string;
     bytes: number;
@@ -30,6 +23,12 @@ interface CloudinaryUploadResult {
 
 export async function POST(request: NextRequest) {
 
+    // Configuration - Moved inside the handler
+    cloudinary.config({
+        cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET // Click 'View Credentials' below to copy your API secret
+    });
 
     try {
 
