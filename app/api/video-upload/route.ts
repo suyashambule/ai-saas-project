@@ -3,8 +3,16 @@ import { v2 as cloudinary } from 'cloudinary';
 import { auth } from '@clerk/nextjs/server';
 import { PrismaClient } from '@prisma/client';
 
+// PrismaClient is instantiated at the module level
+// Best practice for Next.js with Prisma
 
-const prisma = new PrismaClient()
+declare global {
+    var prisma: PrismaClient | undefined
+}
+
+const prisma = globalThis.prisma || new PrismaClient()
+
+if(process.env.NODE_ENV !== 'production') globalThis.prisma = prisma
 
 // Configuration
 cloudinary.config({
